@@ -1,5 +1,6 @@
 #!/bin/bash
 # merge the individual borough MapPLUTO shapefiles and import into PostgreSQL / PostGIS
+# requires: gdal / ogr2ogr, postgresql, postgis
 # run this script inside a folder containing individual folders of shapefiles for each borough
 
 file='./map_pluto_2015v1.shp' # name of output merged shapefile file
@@ -36,4 +37,4 @@ ogrinfo -al -so $file
 # to do: add a step here to pause the script to make sure the output from above looks good!
 
 # import data into postgres (requires a PostGIS extension to be enabled on the db)
-shp2pgsql $file $base $db | psql -d $db
+shp2pgsql -s 4326 $file $base $db | psql -d $db
