@@ -45,4 +45,4 @@ FROM (
    FROM bk_flips
    GROUP BY council
 ) as flip
-order by council desc;
+order by flip_tax desc;
