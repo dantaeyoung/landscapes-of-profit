@@ -32,3 +32,17 @@ CREATE TABLE bk_flips AS (
   FROM acris_flips_bbl b, bk2015v1 a
   WHERE a.bbl = b.bbl
 );
+
+-- aggregate profit by council district
+SELECT cast(flip.a::numeric as money) as after, 
+       cast(flip.b::numeric as money) as before, 
+       cast(((flip.a - flip.b)*0.01)::numeric as money) as flip_tax, 
+       flip.council 
+FROM (
+   SELECT sum(after_document_amt) as a, 
+          sum(before_document_amt) as b, 
+          council 
+   FROM bk_flips
+   GROUP BY council
+) as flip
+order by council desc;
