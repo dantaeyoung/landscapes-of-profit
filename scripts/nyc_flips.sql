@@ -34,6 +34,10 @@ CREATE TABLE nyc_flips AS (
   WHERE a.bbl = b.bbl
 );
 
+-- exclude transactions where profit < $100k and sale >= 5x than purchase
+SELECT count(*) FROM nyc_flips
+WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5);
+
 -- aggregate profit by council district
 SELECT cast(flip.a::numeric as money) as after, 
        cast(flip.b::numeric as money) as before, 
@@ -44,6 +48,7 @@ FROM (
           sum(before_document_amt) as b, 
           council 
    FROM nyc_flips
+   WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5)
    GROUP BY council
 ) as flip
 order by flip_tax desc;
