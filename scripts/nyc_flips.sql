@@ -1,3 +1,11 @@
+-- add the BBL column
+alter table acris_flips_names add column bbl bigint;
+
+-- populate BBL
+update acris_flips_names set bbl = (
+      (borough::text || LPAD(block::text,5,'0') || LPAD(lot::text, 4, '0'))::bigint
+   );
+
 -- join acris data to map pluto
 DROP TABLE IF EXISTS nyc_flips;
 CREATE TABLE nyc_flips AS (
@@ -30,13 +38,12 @@ CREATE TABLE nyc_flips AS (
          b.ratiopricediff,
          b.dayspast,
          b.bbl
-  FROM acris_flips_bbl b, map_pluto_2015v1 a
+  FROM acris_flips_names b, map_pluto_2015v1 a
   WHERE a.bbl = b.bbl
 );
 
--- exclude transactions where profit < $100k and sale >= 5x than purchase
-SELECT * FROM nyc_flips
-WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5);
+-- exclude transactions where profit < $100k and sale >= 5x than purchase.
+SELECT * FROM nyc_flips WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5);
 
 -- DELETE FROM nyc_flips
 -- WHERE (after_document_amt - before_document_amt) < 100000 AND (ratiopricediff > 5);
@@ -56,7 +63,7 @@ FROM (
    WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5)
    GROUP BY council
 ) as flip
-order by flip_tax desc;
+order by flip_tax desc
 
 -- aggregate by zipcode, include # of flips
 SELECT cast(flip.a::numeric as money) as after, 
@@ -73,4 +80,4 @@ FROM (
    WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5)
    GROUP BY zipcode
 ) as flip
-order by flip_tax desc;
+order by flip_tax desc
