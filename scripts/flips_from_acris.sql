@@ -1,7 +1,7 @@
 SELECT l.*,
   m.crfn, m.recorded_borough, m.doc_type, m.document_date, m.document_amt, m.recorded_datetime, m.modified_date, m.percent_trans, p.party_type, p.name, p.addr1, p.addr2, p.country, p.city, p.state, p.zip
 INTO deriv
-FROM acris_legals l, acris_master m, acris_parties p
+FROM acris_real_property_legals l, acris_real_property_master m, acris_real_property_parties p
 WHERE l.document_id = m.document_id
   AND m.document_id = p.document_id
   AND m.recorded_datetime >= '2003-01-01'
@@ -11,12 +11,12 @@ WHERE l.document_id = m.document_id
 CREATE INDEX document_id on deriv (document_id);
 CREATE INDEX bbl ON deriv (borough, block, lot);
 
-SELECT document_id, count(distinct borough || '|' || block || '|' || lot) INTO acris_dupes FROM deriv GROUP BY document_id;
-CREATE INDEX document_id_key on acris_dupes (document_id);
+SELECT document_id, count(distinct borough || '|' || block || '|' || lot) INTO acris_real_property_dupes FROM deriv GROUP BY document_id;
+CREATE INDEX document_id_key on acris_real_property_dupes (document_id);
 
 DELETE FROM deriv
 WHERE document_id IN
-  (SELECT document_id FROM acris_dupes WHERE "count" > 1);
+  (SELECT document_id FROM acris_real_property_dupes WHERE "count" > 1);
 DELETE FROM deriv WHERE document_amt < 100000;
 
 SELECT
@@ -72,7 +72,7 @@ INTO flips_output
 FROM flips_raw
 GROUP BY borough, block, lot;
 
--- to join the queried acris data to pluto:
+-- to join the queried acris_real_property data to pluto:
 CREATE TABLE pluto_flips AS
 SELECT a.*, 
   b.before_document_date,
