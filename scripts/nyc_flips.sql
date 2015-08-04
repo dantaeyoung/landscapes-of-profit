@@ -45,10 +45,12 @@ WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 
 SELECT cast(flip.a::numeric as money) as after, 
        cast(flip.b::numeric as money) as before, 
        cast(((flip.a - flip.b)*0.01)::numeric as money) as flip_tax, 
+       flip.total_flips,
        flip.council 
 FROM (
    SELECT sum(after_document_amt) as a, 
           sum(before_document_amt) as b, 
+          count(*) as total_flips,
           council 
    FROM nyc_flips
    WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5)
