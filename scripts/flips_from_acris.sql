@@ -49,7 +49,7 @@ SELECT
   after.zip after_zip
 INTO flips_raw
 FROM deriv before, deriv after
-WHERE after.document_date - before.document_date BETWEEN 1 and 730
+WHERE after.document_date::date - before.document_date::date BETWEEN 1 and 730
   AND before.document_amt * 1.5 < after.document_amt
   AND before.borough = after.borough
   AND before.block = after.block
@@ -64,10 +64,10 @@ SELECT borough,
   MAX(after_document_amt) after_document_amt,
   MAX(after_document_amt::float) / MAX(before_document_amt) ratiopricediff,
   MAX(after_document_date) - MAX(before_document_date) dayspast,
-  SUBSTR(STRING_AGG(CASE WHEN before_party_type = 1 THEN before_name ELSE NULL END, '|'), 0, 255) AS sellers_before,
-  SUBSTR(STRING_AGG(CASE WHEN before_party_type = 2 THEN before_name ELSE NULL END, '|'), 0, 255) AS buyers_before,
-  SUBSTR(STRING_AGG(CASE WHEN after_party_type = 1 THEN after_name ELSE NULL END, '|'), 0, 255) AS sellers_after,
-  SUBSTR(STRING_AGG(CASE WHEN after_party_type = 2 THEN after_name ELSE NULL END, '|'), 0, 255) AS buyers_after
+  SUBSTR(STRING_AGG(CASE WHEN before_party_type::int = 1 THEN before_name ELSE NULL END, '|'), 0, 255) AS sellers_before,
+  SUBSTR(STRING_AGG(CASE WHEN before_party_type::int = 2 THEN before_name ELSE NULL END, '|'), 0, 255) AS buyers_before,
+  SUBSTR(STRING_AGG(CASE WHEN after_party_type::int = 1 THEN after_name ELSE NULL END, '|'), 0, 255) AS sellers_after,
+  SUBSTR(STRING_AGG(CASE WHEN after_party_type::int = 2 THEN after_name ELSE NULL END, '|'), 0, 255) AS buyers_after
 INTO flips_output
 FROM flips_raw
 GROUP BY borough, block, lot;
@@ -83,7 +83,7 @@ SELECT a.*,
   b.sellers_after,
   b.ratiopricediff,
   b.dayspast
-  FROM map_pluto a, flips b
+  FROM pluto a, flips b
   WHERE a.borocode = b.borough 
     AND a.block = b.block 
     AND a.lot = b.lot;
