@@ -77,7 +77,7 @@ FROM (
           count(*) as total_flips,
           council 
    FROM nyc_flips
-   WHERE (after_document_amt - before_document_amt) > 100000 AND (ratiopricediff < 5)
+   WHERE after_document_date >= '2014-01-01' AND after_document_date <= '2014-12-31'
    GROUP BY council
 ) as flip
 order by flip_tax desc
